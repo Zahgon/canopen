@@ -97,33 +97,14 @@ class Network(MutableMapping):
         :raises can.CanError:
             When connection fails.
         """
-        # If bitrate has not been specified, try to find one node where bitrate
-        # has been specified
-        if "bitrate" not in kwargs:
-            for node in self.nodes.values():
-                if node.object_dictionary.bitrate:
-                    kwargs["bitrate"] = node.object_dictionary.bitrate
-                    break
-        if self.bus is None:
-            self.bus = can.Bus(*args, **kwargs)
-        logger.info("Connected to '%s'", self.bus.channel_info)
-        self.notifier = can.Notifier(self.bus, self.listeners, self.NOTIFIER_CYCLE)
-        return self
+        pass
 
     def disconnect(self) -> None:
         """Disconnect from the CAN bus.
 
         Must be overridden in a subclass if a custom interface is used.
         """
-        for node in self.nodes.values():
-            if hasattr(node, "pdo"):
-                node.pdo.stop()
-        if self.notifier is not None:
-            self.notifier.stop(self.NOTIFIER_SHUTDOWN_TIMEOUT)
-        if self.bus is not None:
-            self.bus.shutdown()
-        self.bus = None
-        self.check()
+        pass
 
     def __enter__(self):
         return self
@@ -152,13 +133,7 @@ class Network(MutableMapping):
         :return:
             The Node object that was added.
         """
-        if isinstance(node, int):
-            if upload_eds:
-                logger.info("Trying to read EDS from node %d", node)
-                object_dictionary = import_from_node(node, self)
-            node = RemoteNode(node, object_dictionary)
-        self[node.id] = node
-        return node
+        pass
 
     def create_node(
         self,
@@ -177,10 +152,7 @@ class Network(MutableMapping):
         :return:
             The Node object that was added.
         """
-        if isinstance(node, int):
-            node = LocalNode(node, object_dictionary)
-        self[node.id] = node
-        return node
+        pass
 
     def send_message(self, can_id: int, data: bytes, remote: bool = False) -> None:
         """Send a raw CAN message to the network.
@@ -226,7 +198,7 @@ class Network(MutableMapping):
         :return:
             An task object with a ``.stop()`` method to stop the transmission
         """
-        return PeriodicMessageTask(can_id, data, period, self.bus, remote)
+        pass
 
     def notify(self, can_id: int, data: bytearray, timestamp: float) -> None:
         """Feed incoming message to this library.
@@ -241,11 +213,7 @@ class Network(MutableMapping):
         :param timestamp:
             Timestamp of the message, preferably as a Unix timestamp
         """
-        if can_id in self.subscribers:
-            callbacks = self.subscribers[can_id]
-            for callback in callbacks:
-                callback(can_id, data, timestamp)
-        self.scanner.on_message_received(can_id)
+        pass
 
     def check(self) -> None:
         """Check that no fatal error has occurred in the receiving thread.
@@ -328,11 +296,11 @@ class PeriodicMessageTask:
         self._start()
 
     def _start(self):
-        self._task = self.bus.send_periodic(self.msg, self.period)
+        pass
 
     def stop(self):
         """Stop transmission"""
-        self._task.stop()
+        pass
 
     def update(self, data: bytes) -> None:
         """Update data of message
@@ -340,15 +308,7 @@ class PeriodicMessageTask:
         :param data:
             New data to transmit
         """
-        new_data = bytearray(data)
-        old_data = self.msg.data
-        self.msg.data = new_data
-        if hasattr(self._task, "modify_data"):
-            self._task.modify_data(self.msg)
-        elif new_data != old_data:
-            # Stop and start (will mess up period unfortunately)
-            self._task.stop()
-            self._start()
+        pass
 
 
 class MessageListener(can.Listener):
@@ -362,14 +322,7 @@ class MessageListener(can.Listener):
         self.network = network
 
     def on_message_received(self, msg):
-        if msg.is_error_frame or msg.is_remote_frame:
-            return
-
-        try:
-            self.network.notify(msg.arbitration_id, msg.data, msg.timestamp)
-        except Exception as e:
-            # Exceptions in any callbaks should not affect CAN processing
-            logger.error(str(e))
+        pass
 
     def stop(self) -> None:
         """Override abstract base method to release any resources."""
@@ -398,10 +351,7 @@ class NodeScanner:
         self.nodes: list[int] = []
 
     def on_message_received(self, can_id: int):
-        service = can_id & 0x780
-        node_id = can_id & 0x7F
-        if node_id not in self.nodes and node_id != 0 and service in self.SERVICES:
-            self.nodes.append(node_id)
+        pass
 
     def reset(self):
         """Clear list of found nodes."""
@@ -409,6 +359,4 @@ class NodeScanner:
 
     def search(self, limit: int = 127) -> None:
         """Search for nodes by sending SDO requests to all node IDs."""
-        sdo_req = b"\x40\x00\x10\x00\x00\x00\x00\x00"
-        for node_id in range(1, limit + 1):
-            self.network.send_message(0x600 + node_id, sdo_req)
+        pass

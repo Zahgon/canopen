@@ -11,7 +11,4 @@ RECORD = 0x09
 
 def code2str(code: int) -> str:
     """Return the constant name for the given value, empty if not found."""
-    for k, v in globals().items():
-        if k.isupper() and v == code:
-            return k
-    return ""
+    pass

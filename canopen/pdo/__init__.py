@@ -70,11 +70,7 @@ class RPDO(PdoBase):
         :raise TypeError: Exception is thrown if the node associated with the PDO does not
         support this function.
         """
-        if isinstance(self.node, node.RemoteNode):
-            for pdo in self.map.values():
-                pdo.stop()
-        else:
-            raise TypeError('The node type does not support this function.')
+        pass
 
 
 class TPDO(PdoBase):
@@ -95,11 +91,7 @@ class TPDO(PdoBase):
         :raise TypeError: Exception is thrown if the node associated with the PDO does not
         support this function.
         """
-        if isinstance(self.node, node.LocalNode):
-            for pdo in self.map.values():
-                pdo.stop()
-        else:
-            raise TypeError('The node type does not support this function.')
+        pass
 
 
 # Compatibility

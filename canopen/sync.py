@@ -25,8 +25,7 @@ class SyncProducer:
         :raises ValueError:
             If the counter value does not fit in one byte.
         """
-        data = bytes([count]) if count is not None else b""
-        self.network.send_message(self.cob_id, data)
+        pass
 
     def start(self, period: Optional[float] = None):
         """Start periodic transmission of SYNC message in a background thread.
@@ -38,19 +37,8 @@ class SyncProducer:
         :raises ValueError:
             If no period is set via argument nor the instance attribute.
         """
-        if self._task is not None:
-            raise RuntimeError("Periodic SYNC transmission task already running")
-
-        if period is not None:
-            self.period = period
-
-        if not self.period:
-            raise ValueError("A valid transmission period has not been given")
-
-        self._task = self.network.send_periodic(self.cob_id, b"", self.period)
+        pass
 
     def stop(self):
         """Stop periodic transmission of SYNC message."""
-        if self._task is not None:
-            self._task.stop()
-        self._task = None
+        pass

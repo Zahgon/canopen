@@ -183,11 +183,7 @@ class ObjectDictionary(MutableMapping):
 
         :return: ODVariable if found, else `None`
         """
-        obj = self.get(index)
-        if isinstance(obj, ODVariable):
-            return obj
-        elif isinstance(obj, (ODRecord, ODArray)):
-            return obj.get(subindex)
+        pass
 
 
 class ODRecord(MutableMapping):
@@ -383,9 +379,7 @@ class ODVariable:
     def qualname(self) -> str:
         """Fully qualified name of the variable. If the variable is a subindex
         of a record or array, the name will be prefixed with the parent's name."""
-        if isinstance(self.parent, (ODRecord, ODArray)):
-            return f"{self.parent.name}.{self.name}"
-        return self.name
+        pass
 
     def __eq__(self, other: ODVariable) -> bool:
         return (self.index == other.index and
@@ -399,11 +393,11 @@ class ODVariable:
 
     @property
     def writable(self) -> bool:
-        return "w" in self.access_type
+        pass
 
     @property
     def readable(self) -> bool:
-        return "r" in self.access_type or self.access_type == "const"
+        pass
 
     def add_value_description(self, value: int, descr: str) -> None:
         """Associate a value with a string description.
@@ -424,112 +418,31 @@ class ODVariable:
     @property
     def fixed_size(self) -> bool:
         """Indicate whether the amount of needed data is known in advance."""
-        # Only for types which we parse using a structure.
-        return self.data_type in self.STRUCT_TYPES
+        pass
 
     def decode_raw(self, data: bytes) -> Union[int, float, str, bytes, bytearray]:
-        if self.data_type == VISIBLE_STRING:
-            # Strip any trailing NUL characters from C-based systems
-            return data.decode("ascii", errors="ignore").rstrip("\x00")
-        elif self.data_type == UNICODE_STRING:
-            # The CANopen standard does not specify the encoding. This
-            # library assumes UTF-16, being the most common two-byte encoding format.
-            # Strip any trailing NUL characters from C-based systems
-            return data.decode("utf_16_le", errors="ignore").rstrip("\x00")
-        elif self.data_type in self.STRUCT_TYPES:
-            try:
-                value, = self.STRUCT_TYPES[self.data_type].unpack(data)
-                return value
-            except struct.error:
-                raise ObjectDictionaryError(
-                    "Mismatch between expected and actual data size")
-        else:
-            # Just return the data as is
-            return data
+        pass
 
     def encode_raw(self, value: Union[int, float, str, bytes, bytearray]) -> bytes:
-        if isinstance(value, (bytes, bytearray)):
-            return value
-        elif self.data_type == VISIBLE_STRING:
-            return value.encode("ascii")
-        elif self.data_type == UNICODE_STRING:
-            return value.encode("utf_16_le")
-        elif self.data_type in (DOMAIN, OCTET_STRING):
-            return bytes(value)
-        elif self.data_type in self.STRUCT_TYPES:
-            if self.data_type in INTEGER_TYPES:
-                value = int(value)
-            if self.data_type in NUMBER_TYPES:
-                if self.min is not None and value < self.min:
-                    logger.warning(
-                        "Value %d is less than min value %d", value, self.min)
-                if self.max is not None and value > self.max:
-                    logger.warning(
-                        "Value %d is greater than max value %d",
-                        value, self.max)
-            try:
-                return self.STRUCT_TYPES[self.data_type].pack(value)
-            except struct.error:
-                raise ValueError("Value does not fit in specified type")
-        elif self.data_type is None:
-            raise ObjectDictionaryError("Data type has not been specified")
-        else:
-            raise TypeError(
-                f"Do not know how to encode {value!r} to data type 0x{self.data_type:X}")
+        pass
 
     def decode_phys(self, value: int) -> Union[int, bool, float, str, bytes]:
-        if self.data_type in INTEGER_TYPES:
-            value *= self.factor
-        return value
+        pass
 
     def encode_phys(self, value: Union[int, bool, float, str, bytes]) -> int:
-        if self.data_type in INTEGER_TYPES:
-            value /= self.factor
-            value = int(round(value))
-        return value
+        pass
 
     def decode_desc(self, value: int) -> str:
-        if not self.value_descriptions:
-            raise ObjectDictionaryError("No value descriptions exist")
-        elif value not in self.value_descriptions:
-            raise ObjectDictionaryError(
-                f"No value description exists for {value}")
-        else:
-            return self.value_descriptions[value]
+        pass
 
     def encode_desc(self, desc: str) -> int:
-        if not self.value_descriptions:
-            raise ObjectDictionaryError("No value descriptions exist")
-        else:
-            for value, description in self.value_descriptions.items():
-                if description == desc:
-                    return value
-        valid_values = ", ".join(self.value_descriptions.values())
-        raise ValueError(
-            f"No value corresponds to '{desc}'. Valid values are: {valid_values}")
+        pass
 
     def decode_bits(self, value: int, bits: List[int]) -> int:
-        try:
-            bits = self.bit_definitions[bits]
-        except (TypeError, KeyError):
-            pass
-        mask = 0
-        for bit in bits:
-            mask |= 1 << bit
-        return (value & mask) >> min(bits)
+        pass
 
     def encode_bits(self, original_value: int, bits: List[int], bit_value: int):
-        try:
-            bits = self.bit_definitions[bits]
-        except (TypeError, KeyError):
-            pass
-        temp = original_value
-        mask = 0
-        for bit in bits:
-            mask |= 1 << bit
-        temp &= ~mask
-        temp |= bit_value << min(bits)
-        return temp
+        pass
 
 
 class DeviceInformation:

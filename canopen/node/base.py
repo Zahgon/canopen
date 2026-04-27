@@ -29,4 +29,4 @@ class BaseNode:
 
     def has_network(self) -> bool:
         """Check whether the node has been associated to a network."""
-        return not isinstance(self.network, canopen.network._UninitializedNetwork)
+        pass

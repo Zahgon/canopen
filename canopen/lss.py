@@ -95,17 +95,11 @@ class LssMaster:
         :param int mode:
             CONFIGURATION_STATE or WAITING_STATE
         """
-        # LSS messages are always a full 8 bytes long.
-        # Unused bytes are reserved and should be initialized with 0.
-        message = bytearray(8)
-
-        message[0] = CS_SWITCH_STATE_GLOBAL
-        message[1] = mode
-        self.__send_command(message)
+        pass
 
     def send_switch_mode_global(self, mode):
         """obsolete"""
-        self.send_switch_state_global(mode)
+        pass
 
     def send_switch_state_selective(self,
                                     vendorId, productCode, revisionNumber, serialNumber):
@@ -129,17 +123,7 @@ class LssMaster:
             False if there is no response.
         :rtype: bool
         """
-
-        self.__send_lss_address(CS_SWITCH_STATE_SELECTIVE_VENDOR_ID, vendorId)
-        self.__send_lss_address(CS_SWITCH_STATE_SELECTIVE_PRODUCT_CODE, productCode)
-        self.__send_lss_address(CS_SWITCH_STATE_SELECTIVE_REVISION_NUMBER, revisionNumber)
-        response = self.__send_lss_address(CS_SWITCH_STATE_SELECTIVE_SERIAL_NUMBER, serialNumber)
-
-        cs = struct.unpack_from("<B", response)[0]
-        if cs == CS_SWITCH_STATE_SELECTIVE_RESPONSE:
-            return True
-
-        return False
+        pass
 
     def inquire_node_id(self):
         """Read the node id.
@@ -149,7 +133,7 @@ class LssMaster:
             node id. 0 means it is not read by LSS protocol
         :rtype: int
         """
-        return self.__send_inquire_node_id()
+        pass
 
     def inquire_lss_address(self, req_cs):
         """Read the part of LSS address.
@@ -162,7 +146,7 @@ class LssMaster:
             part of LSS address
         :rtype: int
         """
-        return self.__send_inquire_lss_address(req_cs)
+        pass
 
     def configure_node_id(self, new_node_id):
         """Set the node id
@@ -170,7 +154,7 @@ class LssMaster:
         :param int new_node_id:
             new node id to set
         """
-        self.__send_configure(CS_CONFIGURE_NODE_ID, new_node_id)
+        pass
 
     def configure_bit_timing(self, new_bit_timing):
         """Set the bit timing.
@@ -183,7 +167,7 @@ class LssMaster:
             6: 50 kBit/sec, 7: 20 kBit/sec,
             8: 10 kBit/sec
         """
-        self.__send_configure(CS_CONFIGURE_BIT_TIMING, 0, new_bit_timing)
+        pass
 
     def activate_bit_timing(self, switch_delay_ms):
         """Activate the bit timing.
@@ -193,17 +177,12 @@ class LssMaster:
             then activate the bit timing. But it shouldn't send any message
             until another switch delay is elapsed.
         """
-
-        message = bytearray(8)
-
-        message[0] = CS_ACTIVATE_BIT_TIMING
-        message[1:3] = struct.pack('<H', switch_delay_ms)
-        self.__send_command(message)
+        pass
 
     def store_configuration(self):
         """Store node id and baud rate.
         """
-        self.__send_configure(CS_STORE_CONFIGURATION)
+        pass
 
     def send_identify_remote_slave(self,
                                    vendorId, productCode,
@@ -225,21 +204,11 @@ class LssMaster:
             False if there is no response.
         :rtype: bool
         """
-
-        # TODO it should handle the multiple respones from slaves
-
-        self.__send_lss_address(CS_IDENTIFY_REMOTE_SLAVE_VENDOR_ID, vendorId)
-        self.__send_lss_address(CS_IDENTIFY_REMOTE_SLAVE_PRODUCT_CODE, productCode)
-        self.__send_lss_address(CS_IDENTIFY_REMOTE_SLAVE_REVISION_NUMBER_LOW, revisionNumberLow)
-        self.__send_lss_address(CS_IDENTIFY_REMOTE_SLAVE_REVISION_NUMBER_HIGH, revisionNumberHigh)
-        self.__send_lss_address(CS_IDENTIFY_REMOTE_SLAVE_SERIAL_NUMBER_LOW, serialNumberLow)
-        self.__send_lss_address(CS_IDENTIFY_REMOTE_SLAVE_SERIAL_NUMBER_HIGH, serialNumberHigh)
+        pass
 
     def send_identify_non_configured_remote_slave(self):
         # TODO it should handle the multiple respones from slaves
-        message = bytearray(8)
-        message[0] = CS_IDENTIFY_NON_CONFIGURED_REMOTE_SLAVE
-        self.__send_command(message)
+        pass
 
     def fast_scan(self):
         """This command sends a series of fastscan message
@@ -251,62 +220,13 @@ class LssMaster:
             list is the LSS identities [vendor_id, product_code, revision_number, serial_number]
         :rtype: bool, list
         """
-        lss_id = [0] * 4
-        lss_bit_check = 128
-        lss_sub = 0
-        lss_next = 0
-
-        if self.__send_fast_scan_message(lss_id[0], lss_bit_check, lss_sub, lss_next):
-            time.sleep(0.01)
-            while lss_sub < 4:
-                lss_bit_check = 32
-                while lss_bit_check > 0:
-                    lss_bit_check -= 1
-
-                    if not self.__send_fast_scan_message(lss_id[lss_sub], lss_bit_check, lss_sub, lss_next):
-                        lss_id[lss_sub] |= 1<<lss_bit_check
-
-                    time.sleep(0.01)
-
-                lss_next = (lss_sub + 1) & 3
-                if not self.__send_fast_scan_message(lss_id[lss_sub], lss_bit_check, lss_sub, lss_next):
-                    return False, None
-
-                time.sleep(0.01)
-
-                # Now the next 32 bits will be scanned
-                lss_sub += 1
-
-            # Now lss_id contains the entire 128 bits scanned
-            return True, lss_id
-
-        return False, None
+        pass
 
     def __send_fast_scan_message(self, id_number, bit_checker, lss_sub, lss_next):
-        message = bytearray(8)
-        message[0:8] = struct.pack('<BIBBB', CS_FAST_SCAN, id_number, bit_checker, lss_sub, lss_next)
-        try:
-            recv_msg = self.__send_command(message)
-        except LssError:
-            return False
-
-        cs = struct.unpack_from("<B", recv_msg)[0]
-        if cs == CS_IDENTIFY_SLAVE:
-                return True
-
-        return False
+        pass
 
     def __send_lss_address(self, req_cs, number):
-        message = bytearray(8)
-
-        message[0] = req_cs
-        message[1:5] = struct.pack('<I', number)
-        response = self.__send_command(message)
-        # some device needs these delays between messages
-        # because it can't handle messages arriving with no delay
-        time.sleep(0.2)
-
-        return response
+        pass
 
     def __send_inquire_node_id(self):
         """
@@ -314,16 +234,7 @@ class LssMaster:
             Current node id
         :rtype: int
         """
-        message = bytearray(8)
-        message[0] = CS_INQUIRE_NODE_ID
-        response = self.__send_command(message)
-
-        cs, current_node_id = struct.unpack_from("<BB", response)
-
-        if cs != CS_INQUIRE_NODE_ID:
-            raise LssError("Response message is not for the request")
-
-        return current_node_id
+        pass
 
     def __send_inquire_lss_address(self, req_cs):
         """
@@ -331,33 +242,11 @@ class LssMaster:
             part of address. e.g., vendor ID or product code,  ..
         :rtype: int
         """
-        message = bytearray(8)
-        message[0] = req_cs
-        response = self.__send_command(message)
-
-        res_cs, part_of_address = struct.unpack_from("<BI", response)
-
-        if res_cs != req_cs:
-            raise LssError("Response message is not for the request")
-
-        return part_of_address
+        pass
 
     def __send_configure(self, req_cs, value1=0, value2=0):
         """Send a message to set a key with values"""
-        message = bytearray(8)
-        message[0] = req_cs
-        message[1] = value1
-        message[2] = value2
-        response = self.__send_command(message)
-
-        res_cs, error_code = struct.unpack_from("<BB", response)
-
-        if res_cs != req_cs:
-            raise LssError("Response message is not for the request")
-
-        if error_code != ERROR_NONE:
-            error_msg = f"LSS Error: {error_code}"
-            raise LssError(error_msg)
+        pass
 
     def __send_command(self, message):
         """Send a LSS operation code to the network
@@ -370,31 +259,10 @@ class LssMaster:
             None if there is no response
         :rtype: bytes
         """
-
-        logger.info("Sending LSS message %s", message.hex(" ").upper())
-
-        response = None
-        if not self.responses.empty():
-            logger.info("There were unexpected messages in the queue")
-            self.responses = queue.Queue()
-
-        self.network.send_message(self.LSS_TX_COBID, message)
-
-        if not bool(message[0] in ListMessageNeedResponse):
-            return response
-
-        # Wait for the slave to respond
-        # TODO check if the response is LSS response message
-        try:
-            response = self.responses.get(
-                block=True, timeout=self.RESPONSE_TIMEOUT)
-        except queue.Empty:
-            raise LssError("No LSS response received")
-
-        return response
+        pass
 
     def on_message_received(self, can_id, data, timestamp):
-        self.responses.put(bytes(data))
+        pass
 
 
 class LssError(Exception):

@@ -500,11 +500,7 @@ def export_eds(od, dest=None, file_info={}, device_commisioning=False):
         return x in range(0x2000, 0x6000)
 
     def optional_indices(x):
-        return all((
-            x > 0x1001,
-            not mandatory_indices(x),
-            not manufacturer_idices(x),
-        ))
+        pass
 
     supported_mantatory_indices = list(filter(mandatory_indices, od))
     supported_optional_indices = list(filter(optional_indices, od))

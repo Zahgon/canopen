@@ -44,7 +44,7 @@ class SdoClient(SdoBase):
         self.responses = queue.Queue()
 
     def on_response(self, can_id, data, timestamp):
-        self.responses.put(bytes(data))
+        pass
 
     def send_request(self, request):
         retries_left = self.MAX_RETRIES
@@ -128,13 +128,7 @@ class SdoClient(SdoBase):
         :raises canopen.SdoAbortedError:
             When node responds with an error.
         """
-        with self.open(index, subindex, buffering=0) as fp:
-            response_size = fp.size
-            data = fp.read()
-
-        if response_size and response_size < len(data):
-            data = data[:response_size]
-        return data
+        pass
 
     def download(
         self,
@@ -159,9 +153,7 @@ class SdoClient(SdoBase):
         :raises canopen.SdoAbortedError:
             When node responds with an error.
         """
-        with self.open(index, subindex, "wb", buffering=7, size=len(data),
-                       force_segment=force_segment) as fp:
-            fp.write(data)
+        pass
 
     def open(self, index, subindex=0, mode="rb", encoding="ascii",
              buffering=1024, size=None, block_transfer=False, force_segment=False, request_crc_support=True):
@@ -200,31 +192,7 @@ class SdoClient(SdoBase):
         :returns:
             A file like object.
         """
-        buffer_size = buffering if buffering > 1 else io.DEFAULT_BUFFER_SIZE
-        if "r" in mode:
-            if block_transfer:
-                raw_stream = BlockUploadStream(self, index, subindex, request_crc_support=request_crc_support)
-            else:
-                raw_stream = ReadableStream(self, index, subindex)
-            if buffering:
-                buffered_stream = io.BufferedReader(raw_stream, buffer_size=buffer_size)
-            else:
-                return raw_stream
-        if "w" in mode:
-            if block_transfer:
-                raw_stream = BlockDownloadStream(self, index, subindex, size, request_crc_support=request_crc_support)
-            else:
-                raw_stream = WritableStream(self, index, subindex, size, force_segment)
-            if buffering:
-                buffered_stream = io.BufferedWriter(raw_stream, buffer_size=buffer_size)
-            else:
-                return raw_stream
-        if "b" not in mode:
-            # Text mode
-            line_buffering = buffering == 1
-            return io.TextIOWrapper(buffered_stream, encoding,
-                                    line_buffering=line_buffering)
-        return buffered_stream
+        pass
 
 
 class ReadableStream(io.RawIOBase):
@@ -289,47 +257,20 @@ class ReadableStream(io.RawIOBase):
         :returns: 1 - 7 bytes of data or no bytes if EOF.
         :rtype: bytes
         """
-        if self._done:
-            return b""
-        if self.exp_data is not None:
-            self._done = True
-            return self.exp_data
-        if size is None or size < 0:
-            return self.readall()
-
-        command = REQUEST_SEGMENT_UPLOAD
-        command |= self._toggle
-        request = bytearray(8)
-        request[0] = command
-        response = self.sdo_client.request_response(request)
-        res_command, = struct.unpack_from("B", response)
-        if res_command & 0xE0 != RESPONSE_SEGMENT_UPLOAD:
-            self.sdo_client.abort(ABORT_INVALID_COMMAND_SPECIFIER)
-            raise SdoCommunicationError(f"Unexpected response 0x{res_command:02X}")
-        if res_command & TOGGLE_BIT != self._toggle:
-            self.sdo_client.abort(ABORT_TOGGLE_NOT_ALTERNATED)
-            raise SdoCommunicationError("Toggle bit mismatch")
-        length = 7 - ((res_command >> 1) & 0x7)
-        if res_command & NO_MORE_DATA:
-            self._done = True
-        self._toggle ^= TOGGLE_BIT
-        self.pos += length
-        return response[1:length + 1]
+        pass
 
     def readinto(self, b):
         """
         Read bytes into a pre-allocated, writable bytes-like object b,
         and return the number of bytes read.
         """
-        data = self.read(7)
-        b[:len(data)] = data
-        return len(data)
+        pass
 
     def readable(self):
-        return True
+        pass
 
     def tell(self):
-        return self.pos
+        pass
 
 
 class WritableStream(io.RawIOBase):
@@ -446,10 +387,10 @@ class WritableStream(io.RawIOBase):
             self._done = True
 
     def writable(self):
-        return True
+        pass
 
     def tell(self):
-        return self.pos
+        pass
 
 
 class BlockUploadStream(io.RawIOBase):
@@ -521,41 +462,7 @@ class BlockUploadStream(io.RawIOBase):
         :returns: 1 - 7 bytes of data or no bytes if EOF.
         :rtype: bytes
         """
-        if self._done:
-            return b""
-        if size is None or size < 0:
-            return self.readall()
-
-        try:
-            response = self.sdo_client.read_response()
-        except SdoCommunicationError:
-            response = self._retransmit()
-        res_command, = struct.unpack_from("B", response)
-        seqno = res_command & 0x7F
-        if seqno == self._ackseq + 1:
-            self._ackseq = seqno
-        else:
-            # Wrong sequence number
-            response = self._retransmit()
-            res_command, = struct.unpack_from("B", response)
-        if self._ackseq >= self.blksize or res_command & NO_MORE_BLOCKS:
-            self._ack_block()
-        if res_command & NO_MORE_BLOCKS:
-            n = self._end_upload()
-            data = response[1:8 - n]
-            self._done = True
-        else:
-            data = response[1:8]
-        if self.crc_supported:
-            self._crc.process(data)
-            if self._done:
-                if self._server_crc != self._crc.final():
-                    self._error = True
-                    self.sdo_client.abort(ABORT_CRC_ERROR)
-                    raise SdoCommunicationError("CRC is not OK")
-                logger.info("CRC is OK")
-        self.pos += len(data)
-        return data
+        pass
 
     def _retransmit(self):
         logger.info("Only %d sequences were received. Requesting retransmission",
@@ -583,22 +490,7 @@ class BlockUploadStream(io.RawIOBase):
         self._ackseq = 0
 
     def _end_upload(self):
-        try:
-            response = self.sdo_client.read_response()
-        except SdoCommunicationError:
-            self.abort(ABORT_TIMED_OUT)
-            raise
-        res_command, self._server_crc = struct.unpack_from("<BH", response)
-        if res_command & 0xE0 != RESPONSE_BLOCK_UPLOAD:
-            self._error = True
-            self.sdo_client.abort(ABORT_INVALID_COMMAND_SPECIFIER)
-            raise SdoCommunicationError(f"Unexpected response 0x{res_command:02X}")
-        if res_command & 0x3 != END_BLOCK_TRANSFER:
-            self._error = True
-            self.sdo_client.abort(ABORT_INVALID_COMMAND_SPECIFIER)
-            raise SdoCommunicationError("Server did not end transfer as expected")
-        # Return number of bytes not used in last message
-        return (res_command >> 2) & 0x7
+        pass
 
     def close(self):
         if self.closed:
@@ -610,19 +502,17 @@ class BlockUploadStream(io.RawIOBase):
             self.sdo_client.send_request(request)
 
     def tell(self):
-        return self.pos
+        pass
 
     def readinto(self, b):
         """
         Read bytes into a pre-allocated, writable bytes-like object b,
         and return the number of bytes read.
         """
-        data = self.read(7)
-        b[:len(data)] = data
-        return len(data)
+        pass
 
     def readable(self):
-        return True
+        pass
 
 
 class BlockDownloadStream(io.RawIOBase):
@@ -743,7 +633,7 @@ class BlockDownloadStream(io.RawIOBase):
             self._block_ack()
 
     def tell(self):
-        return self.pos
+        pass
 
     def _block_ack(self):
         logger.debug("Waiting for acknowledgement of last block...")
@@ -820,4 +710,4 @@ class BlockDownloadStream(io.RawIOBase):
         logger.info("Block download successful")
 
     def writable(self):
-        return True
+        pass

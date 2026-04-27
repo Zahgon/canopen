@@ -39,11 +39,11 @@ class Variable:
     @property
     def data(self) -> bytes:
         """Byte representation of the object as :class:`bytes`."""
-        return self.get_data()
+        pass
 
     @data.setter
     def data(self, data: bytes):
-        self.set_data(data)
+        pass
 
     @property
     def raw(self) -> Union[int, bool, float, str, bytes]:
@@ -75,19 +75,11 @@ class Variable:
         Data types that this library does not handle yet must be read and
         written as :class:`bytes`.
         """
-        value = self.od.decode_raw(self.data)
-        text = f"Value of {self.name!r} ({pretty_index(self.index, self.subindex)}) is {value!r}"
-        if value in self.od.value_descriptions:
-            text += f" ({self.od.value_descriptions[value]})"
-        logger.debug(text)
-        return value
+        pass
 
     @raw.setter
     def raw(self, value: Union[int, bool, float, str, bytes]):
-        logger.debug("Writing %r (0x%04X:%02X) = %r",
-                     self.name, self.index,
-                     self.subindex, value)
-        self.data = self.od.encode_raw(value)
+        pass
 
     @property
     def phys(self) -> Union[int, bool, float, str, bytes]:
@@ -97,30 +89,25 @@ class Variable:
         either a :class:`float` or an :class:`int`.
         Non integers will be passed as is.
         """
-        value = self.od.decode_phys(self.raw)
-        if self.od.unit:
-            logger.debug("Physical value is %s %s", value, self.od.unit)
-        return value
+        pass
 
     @phys.setter
     def phys(self, value: Union[int, bool, float, str, bytes]):
-        self.raw = self.od.encode_phys(value)
+        pass
 
     @property
     def desc(self) -> str:
         """Converts to and from a description of the value as a string."""
-        value = self.od.decode_desc(self.raw)
-        logger.debug("Description is '%s'", value)
-        return value
+        pass
 
     @desc.setter
     def desc(self, desc: str):
-        self.raw = self.od.encode_desc(desc)
+        pass
 
     @property
     def bits(self) -> "Bits":
         """Access bits using integers, slices, or bit descriptions."""
-        return Bits(self)
+        pass
 
     def read(self, fmt: str = "raw") -> Union[int, bool, float, str, bytes]:
         """Alternative way of reading using a function instead of attributes.
@@ -136,12 +123,7 @@ class Variable:
         :returns:
             The value of the variable.
         """
-        if fmt == "raw":
-            return self.raw
-        elif fmt == "phys":
-            return self.phys
-        elif fmt == "desc":
-            return self.desc
+        pass
 
     def write(
         self, value: Union[int, bool, float, str, bytes], fmt: str = "raw"
@@ -172,13 +154,7 @@ class Bits(Mapping):
 
     @staticmethod
     def _get_bits(key):
-        if isinstance(key, slice):
-            bits = range(key.start, key.stop, key.step)
-        elif isinstance(key, int):
-            bits = [key]
-        else:
-            bits = key
-        return bits
+        pass
 
     def __getitem__(self, key) -> int:
         return self.variable.od.decode_bits(self.raw, self._get_bits(key))
@@ -195,7 +171,7 @@ class Bits(Mapping):
         return len(self.variable.od.bit_definitions)
 
     def read(self):
-        self.raw = self.variable.raw
+        pass
 
     def write(self):
         self.variable.raw = self.raw

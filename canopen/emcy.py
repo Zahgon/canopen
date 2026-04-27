@@ -26,20 +26,7 @@ class EmcyConsumer:
         self.emcy_received = threading.Condition()
 
     def on_emcy(self, can_id, data, timestamp):
-        code, register, data = EMCY_STRUCT.unpack(data)
-        entry = EmcyError(code, register, data, timestamp)
-
-        with self.emcy_received:
-            if code & 0xFF00 == 0:
-                # Error reset
-                self.active = []
-            else:
-                self.active.append(entry)
-            self.log.append(entry)
-            self.emcy_received.notify_all()
-
-        for callback in self.callbacks:
-            callback(entry)
+        pass
 
     def add_callback(self, callback: Callable[[EmcyError], None]):
         """Get notified on EMCY messages from this node.
@@ -48,7 +35,7 @@ class EmcyConsumer:
             Callable which must take one argument of an
             :class:`~canopen.emcy.EmcyError` instance.
         """
-        self.callbacks.append(callback)
+        pass
 
     def reset(self):
         """Reset log and active lists."""
@@ -65,23 +52,7 @@ class EmcyConsumer:
 
         :return: The EMCY exception object or None if timeout
         """
-        end_time = time.time() + timeout
-        while True:
-            with self.emcy_received:
-                prev_log_size = len(self.log)
-                self.emcy_received.wait(timeout)
-                if len(self.log) == prev_log_size:
-                    # Resumed due to timeout
-                    return None
-                # Get last logged EMCY
-                emcy = self.log[-1]
-                logger.info("Got %s", emcy)
-                if time.time() > end_time:
-                    # No valid EMCY received on time
-                    return None
-                if emcy_code is None or emcy.code == emcy_code:
-                    # This is the one we're interested in
-                    return emcy
+        pass
 
 
 class EmcyProducer:

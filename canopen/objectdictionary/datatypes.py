@@ -87,7 +87,7 @@ class UnsignedN(struct.Struct):
 
     @property
     def size(self) -> int:
-        return self.width // 8
+        pass
 
 
 class IntegerN(struct.Struct):
@@ -124,4 +124,4 @@ class IntegerN(struct.Struct):
 
     @property
     def size(self) -> int:
-        return self.width // 8
+        pass
