@@ -76,8 +76,7 @@ class PdoBase(Mapping):
         associated with read() or save(), if the local PDO setup is
         known to match what's stored on the node.
         """
-        for pdo_map in self.map.values():
-            pdo_map.subscribe()
+        pass
 
     def export(self, filename):
         """Export current configuration to a database file.
@@ -280,9 +279,7 @@ class PdoMap:
         associated with read() or save(), if the local PDO setup is
         known to match what's stored on the node.
         """
-        if self.enabled and self.cob_id:
-            logger.info("Subscribing to enabled PDO 0x%X on the network", self.cob_id)
-            self.pdo_node.network.subscribe(self.cob_id, self.on_message)
+        pass
 
     def clear(self) -> None:
         """Clear all variables from this map."""

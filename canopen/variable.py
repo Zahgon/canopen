@@ -31,10 +31,10 @@ class Variable:
         return f"<{type(self).__qualname__} {self.name!r} at {pretty_index(self.index, subindex)}>"
 
     def get_data(self) -> bytes:
-        raise NotImplementedError("Variable is not readable")
+        pass
 
     def set_data(self, data: bytes):
-        raise NotImplementedError("Variable is not writable")
+        pass
 
     @property
     def data(self) -> bytes:
@@ -138,12 +138,7 @@ class Variable:
              - 'phys'
              - 'desc'
         """
-        if fmt == "raw":
-            self.raw = value
-        elif fmt == "phys":
-            self.phys = value
-        elif fmt == "desc":
-            self.desc = value
+        pass
 
 
 class Bits(Mapping):
@@ -174,4 +169,4 @@ class Bits(Mapping):
         pass
 
     def write(self):
-        self.variable.raw = self.raw
+        pass

@@ -39,8 +39,7 @@ class EmcyConsumer:
 
     def reset(self):
         """Reset log and active lists."""
-        self.log = []
-        self.active = []
+        pass
 
     def wait(
         self, emcy_code: Optional[int] = None, timeout: float = 10
@@ -62,12 +61,10 @@ class EmcyProducer:
         self.cob_id = cob_id
 
     def send(self, code: int, register: int = 0, data: bytes = b""):
-        payload = EMCY_STRUCT.pack(code, register, data)
-        self.network.send_message(self.cob_id, payload)
+        pass
 
     def reset(self, register: int = 0, data: bytes = b""):
-        payload = EMCY_STRUCT.pack(0, register, data)
-        self.network.send_message(self.cob_id, payload)
+        pass
 
 
 class EmcyError(Exception):
@@ -100,10 +97,7 @@ class EmcyError(Exception):
         self.timestamp = timestamp
 
     def get_desc(self) -> str:
-        for code, mask, description in self.DESCRIPTIONS:
-            if self.code & mask == code:
-                return description
-        return ""
+        pass
 
     def __str__(self):
         text = f"Code 0x{self.code:04X}"

@@ -59,13 +59,11 @@ class SdoServer(SdoBase):
         pass
 
     def send_response(self, response):
-        self.network.send_message(self.tx_cobid, response)
+        pass
 
     def abort(self, abort_code=ABORT_GENERAL_ERROR):
         """Abort current transfer."""
-        data = struct.pack("<BHBL", RESPONSE_ABORTED,
-                           self._index, self._subindex, abort_code)
-        self.send_response(data)
+        pass
         # logger.error("Transfer aborted with code 0x%08X", abort_code)
 
     def upload(self, index: int, subindex: int) -> bytes:

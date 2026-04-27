@@ -61,9 +61,7 @@ class Network(MutableMapping):
         :param callback:
             Function to call when message is received.
         """
-        self.subscribers.setdefault(can_id, list())
-        if callback not in self.subscribers[can_id]:
-            self.subscribers[can_id].append(callback)
+        pass
 
     def unsubscribe(self, can_id, callback=None) -> None:
         """Stop listening for message.
@@ -74,10 +72,7 @@ class Network(MutableMapping):
             If given, remove only this callback.  Otherwise all callbacks for
             the CAN ID.
         """
-        if callback is not None:
-            self.subscribers[can_id].remove(callback)
-        if not self.subscribers[can_id] or callback is None:
-            del self.subscribers[can_id]
+        pass
 
     def connect(self, *args, **kwargs) -> Network:
         """Connect to CAN bus using python-can.
@@ -171,15 +166,7 @@ class Network(MutableMapping):
         :raises can.CanError:
             When the message fails to be transmitted
         """
-        if not self.bus:
-            raise RuntimeError("Not connected to CAN bus")
-        msg = can.Message(is_extended_id=can_id > 0x7FF,
-                          arbitration_id=can_id,
-                          data=data,
-                          is_remote_frame=remote)
-        with self.send_lock:
-            self.bus.send(msg)
-        self.check()
+        pass
 
     def send_periodic(
         self, can_id: int, data: bytes, period: float, remote: bool = False
@@ -221,11 +208,7 @@ class Network(MutableMapping):
         If an exception caused the thread to terminate, that exception will be
         raised.
         """
-        if self.notifier is not None:
-            exc = self.notifier.exception
-            if exc is not None:
-                logger.error("An error has caused receiving of messages to stop")
-                raise exc
+        pass
 
     def __getitem__(self, node_id: int) -> Union[RemoteNode, LocalNode]:
         return self.nodes[node_id]
@@ -355,7 +338,7 @@ class NodeScanner:
 
     def reset(self):
         """Clear list of found nodes."""
-        self.nodes = []
+        pass
 
     def search(self, limit: int = 127) -> None:
         """Search for nodes by sending SDO requests to all node IDs."""

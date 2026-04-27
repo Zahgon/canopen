@@ -17,10 +17,10 @@ class CrcXmodem:
         self._value = 0
 
     def process(self, data):
-        self._value = binascii.crc_hqx(data, self._value)
+        pass
 
     def final(self):
-        return self._value
+        pass
 
 
 class SdoBase(Mapping):
@@ -77,7 +77,7 @@ class SdoBase(Mapping):
         pass
 
     def upload(self, index: int, subindex: int) -> bytes:
-        raise NotImplementedError()
+        pass
 
     def download(
         self,
@@ -86,7 +86,7 @@ class SdoBase(Mapping):
         data: bytes,
         force_segment: bool = False,
     ) -> None:
-        raise NotImplementedError()
+        pass
 
 
 class SdoRecord(Mapping):
